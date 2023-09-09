@@ -56,41 +56,63 @@ def desc(self, deck, _old):
     button = mw.button
     desc = ""
 
-    if( deck.get("desc", "")!=""):
-        desc += "<div class='deck-desc'  style='background-color:{THEME[large-areas-color]}'>".format(THEME=THEME)
+    if deck.get("desc", "") != "":
+        desc += "<div class='deck-desc'  style='background-color:{THEME[large-areas-color]}'>".format(
+            THEME=THEME
+        )
         desc += deck.get("desc", "")
         desc += """
         </div>"""
 
-
     counts = list(self.mw.col.sched.counts())
     finished = not sum(counts)
     if finished:
-        finish_msg = u'''
+        finish_msg = """
       <div > {:s}</div>
-    '''.format(self.mw.col.sched.finishedMsg())
+    """.format(
+            self.mw.col.sched.finishedMsg()
+        )
         btn = ""
         desc += finish_msg
     else:
         finish_msg = ""
-        btn = u'''
+        btn = """
             {button:s}
-            '''.format(button=button('study', _('<img style=\"margin-top: -5px; margin-right:5px\" src=\"{base}/user_files/assets/icons/deck overview icons/study now.svg\" > Study Now'.format(base=base)), id='study', class_='btn btn-lg', extra='style=\'background:{THEME[buttons-color]};color:{THEME[buttons-label-color]};\''.format(THEME=THEME)))
+            """.format(
+            button=button(
+                "study",
+                _(
+                    '<img style="margin-top: -5px; margin-right:5px" src="{base}/user_files/assets/icons/deck overview icons/study now.svg" > Study Now'.format(
+                        base=base
+                    )
+                ),
+                id="study",
+                class_="btn btn-lg",
+                extra="style='background:{THEME[buttons-color]};color:{THEME[buttons-label-color]};'".format(
+                    THEME=THEME
+                ),
+            )
+        )
     if deck["dyn"]:
-        desc += """
+        desc += (
+            """
 <div class='card-panel animate__animated animate__fadeInUp animate__slow amber amber lighten-4'>This is a special deck for studying outside of the normal schedule.
 Cards will be automatically returned to their original decks after you review
 them.Deleting this deck from the deck list will return all remaining cards
-to their original deck.</div>"""+btn
+to their original deck.</div>"""
+            + btn
+        )
 
     else:
-        desc+="""
+        desc += """
         <br>
         <br>
         <div>
         {}
         </div>
-        """.format(btn)
+        """.format(
+            btn
+        )
     if not desc:
         return "<p>"
     if deck["dyn"]:
@@ -99,14 +121,17 @@ to their original deck.</div>"""+btn
         dyn = ""
     return '<div class=" %s">%s</div>' % (dyn, desc)
 
+
 #####################################################################################################################
 
+
 def table(self):
-    current_deck_name = self.mw.col.decks.current()['name']
+    current_deck_name = self.mw.col.decks.current()["name"]
 
     try:
-        learn_per_day = self.mw.col.decks.confForDid(
-            self.mw.col.decks.current()['id'])['new']['perDay']
+        learn_per_day = self.mw.col.decks.confForDid(self.mw.col.decks.current()["id"])[
+            "new"
+        ]["perDay"]
     except:
         learn_per_day = 0
 
@@ -114,8 +139,8 @@ def table(self):
     count_label = LOCALS["Cards"]
     last_match_length = 0
 
-    if 'note_correction_factors' in CONFIG:
-        for fragment, factor in CONFIG['note_correction_factors'].items():
+    if "note_correction_factors" in CONFIG:
+        for fragment, factor in CONFIG["note_correction_factors"].items():
             if current_deck_name.startswith(fragment):
                 if len(fragment) > last_match_length:
                     correction_for_notes = int(factor)
@@ -126,22 +151,22 @@ def table(self):
         if correction_for_notes <= 0:
             correction_for_notes = 1
 
-    if 'date_format' in CONFIG:
-        if CONFIG['date_format'].strip().lower() == 'us':
+    if "date_format" in CONFIG:
+        if CONFIG["date_format"].strip().lower() == "us":
             date_format = "%m/%d/%Y"
-        elif CONFIG['date_format'].strip().lower() == 'asia':
+        elif CONFIG["date_format"].strip().lower() == "asia":
             date_format = "%Y/%m/%d"
-        elif CONFIG['date_format'].strip().lower() == 'eu':
+        elif CONFIG["date_format"].strip().lower() == "eu":
             date_format = "%d.%m.%Y"
-        elif CONFIG['date_format'].strip().lower() == 'iso':
+        elif CONFIG["date_format"].strip().lower() == "iso":
             date_format = "%Y-%m-%d"
         else:
-            date_format = CONFIG['date_format']
+            date_format = CONFIG["date_format"]
     else:
         date_format = "%Y-%m-%d"
 
     total, mature, young, unseen, suspended, due = self.mw.col.db.first(
-        u'''
+        """
       select
       -- total
       count(id),
@@ -161,49 +186,58 @@ def table(self):
       sum(case when queue = 1 and due <= ?
            then 1 else 0 end)
       from cards where did in {:s}
-    '''.format(self.mw.col.sched._deckLimit()),
-        round(time.time()))
+    """.format(
+            self.mw.col.sched._deckLimit()
+        ),
+        round(time.time()),
+    )
 
     if not total:
-        return u'<p>No cards found.</p>'
+        return "<p>No cards found.</p>"
 
     scheduled_counts = list(self.mw.col.sched.counts())
     cards = {}
 
-    cards['mature'] = mature // int(correction_for_notes)
-    cards['young'] = young // int(correction_for_notes)
-    cards['unseen'] = unseen // int(correction_for_notes)
-    cards['suspended'] = suspended // int(correction_for_notes)
-    cards['total'] = total // int(correction_for_notes)
-    cards['new'] = scheduled_counts[0]
-    cards['learning'] = scheduled_counts[1]
-    cards['review'] = scheduled_counts[2]
-    cards['todo'] = cards['new'] + cards['learning'] + cards['review']
-    cards['count_label'] = count_label
+    cards["mature"] = mature // int(correction_for_notes)
+    cards["young"] = young // int(correction_for_notes)
+    cards["unseen"] = unseen // int(correction_for_notes)
+    cards["suspended"] = suspended // int(correction_for_notes)
+    cards["total"] = total // int(correction_for_notes)
+    cards["new"] = scheduled_counts[0]
+    cards["learning"] = scheduled_counts[1]
+    cards["review"] = scheduled_counts[2]
+    cards["todo"] = cards["new"] + cards["learning"] + cards["review"]
+    cards["count_label"] = count_label
 
     try:
-        daysUntilDone = math.ceil(cards['unseen'] / learn_per_day)
+        daysUntilDone = math.ceil(cards["unseen"] / learn_per_day)
     except:
         daysUntilDone = 0
 
     try:
-        cards['doneDate'] = (
-            date.today()+timedelta(days=daysUntilDone)).strftime(date_format)
+        cards["doneDate"] = (date.today() + timedelta(days=daysUntilDone)).strftime(
+            date_format
+        )
     except:
-        showInfo("Unsupported date format. Defaulting to Day.Month.Year instead. Use one of the shorthands: \"us\", \"asia\" or \"eu\", or specify the date like \"\%d.\%m.\%Y\", \"\%m/\%d/\%Y\" etc.\n For more information check the table at: https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior", type="warning", title="More Overview Stats 2.1 Warning")
-        cards['doneDate'] = (
-            date.today()+timedelta(days=daysUntilDone)).strftime("%d.%m.%Y")
+        showInfo(
+            'Unsupported date format. Defaulting to Day.Month.Year instead. Use one of the shorthands: "us", "asia" or "eu", or specify the date like "\%d.\%m.\%Y", "\%m/\%d/\%Y" etc.\n For more information check the table at: https://docs.python.org/2/library/datetime.html#strftime-and-strptime-behavior',
+            type="warning",
+            title="More Overview Stats 2.1 Warning",
+        )
+        cards["doneDate"] = (date.today() + timedelta(days=daysUntilDone)).strftime(
+            "%d.%m.%Y"
+        )
 
-    cards['daysLeft'] = daysUntilDone
+    cards["daysLeft"] = daysUntilDone
 
-    if(daysUntilDone == 1):
-        cards['daysLeft'] = '{} {LOCALS[day]}'.format(daysUntilDone,LOCALS=LOCALS)
+    if daysUntilDone == 1:
+        cards["daysLeft"] = "{} {LOCALS[day]}".format(daysUntilDone, LOCALS=LOCALS)
     else:
-        cards['daysLeft'] = '{} {LOCALS[days]}'.format(daysUntilDone,LOCALS=LOCALS)
+        cards["daysLeft"] = "{} {LOCALS[days]}".format(daysUntilDone, LOCALS=LOCALS)
 
- ####################### Writing Output HTML ##########################
+    ####################### Writing Output HTML ##########################
 
-    output = u'''
+    output = """
     <!-----------END Break subtitles script--------------->
 
 
@@ -343,13 +377,17 @@ def table(self):
 
     </div>
 
-  '''.format(cards=cards, OVERVIEW=OVERVIEW , THEME=THEME , PIE=PIE , LOCALS=LOCALS)
+  """.format(
+        cards=cards, OVERVIEW=OVERVIEW, THEME=THEME, PIE=PIE, LOCALS=LOCALS
+    )
 
     return output
+
+
 #####################################################################################################################
 
 
-def renderPage(self,_old):
+def renderPage(self, _old):
     but = self.mw.button
     deck = self.mw.col.decks.current()
     self.sid = deck.get("sharedFrom")
@@ -358,10 +396,10 @@ def renderPage(self,_old):
         shareLink = '<a class=smallLink href="review">Reviews and Updates</a>'
     else:
         shareLink = ""
-    if "::"in deck["name"]:
-        sub = deck["name"].replace("::"," .. ")
+    if "::" in deck["name"]:
+        sub = deck["name"].replace("::", " .. ")
     if "'" in deck["name"]:
-        sub = deck["name"].replace("'","’")
+        sub = deck["name"].replace("'", "’")
 
     else:
         sub = deck["name"]
@@ -381,9 +419,9 @@ def renderPage(self,_old):
 
 
 ####################################################################################################################3
-heatmapStyle=""
+heatmapStyle = ""
 if THEME["heatmap-background"]:
-    heatmapStyle="""
+    heatmapStyle = """
         .rh-container{{
             background-color: {THEME[large-areas-color]};
             box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
@@ -399,9 +437,9 @@ if THEME["heatmap-background"]:
 
 
         }}
-     """.format(THEME=THEME)
-
-
+     """.format(
+        THEME=THEME
+    )
 
 
 Overview._body = """
@@ -461,64 +499,106 @@ font-size:{OVERVIEW[deck-name-font-size]}
 
 
 
-""".format(THEME=THEME,OVERVIEW=OVERVIEW,base=base,heatmapStyle=heatmapStyle)
+""".format(
+    THEME=THEME, OVERVIEW=OVERVIEW, base=base, heatmapStyle=heatmapStyle
+)
 
 
 #####################################################################################################################
 
+
 def renderDeckBottom(self, _old):
     links = [
-        ["O", "opts", _(
-            "<img src=\"{base}/user_files/assets/icons/deck overview icons/options.svg\" style=\"margin-top: -5px; margin-right:5px\"> Options").format(base=base)],
+        [
+            "O",
+            "opts",
+            _(
+                '<img src="{base}/user_files/assets/icons/deck overview icons/options.svg" style="margin-top: -5px; margin-right:5px"> Options'
+            ).format(base=base),
+        ],
     ]
     if self.mw.col.decks.current()["dyn"]:
         links.append(
-            ["R", "refresh", _( "<img src=\"{base}/user_files/assets/icons/deck overview icons/rebuild.svg\" style=\"margin-top: -5px; margin-right:5px\"> Rebuild").format(base=base)])
+            [
+                "R",
+                "refresh",
+                _(
+                    '<img src="{base}/user_files/assets/icons/deck overview icons/rebuild.svg" style="margin-top: -5px; margin-right:5px"> Rebuild'
+                ).format(base=base),
+            ]
+        )
         links.append(
-            ["E", "empty", _( "<img src=\"{base}/user_files/assets/icons/deck overview icons/empty.svg\" style=\"margin-top: -5px; margin-right:5px\"> Empty").format(base=base)])
+            [
+                "E",
+                "empty",
+                _(
+                    '<img src="{base}/user_files/assets/icons/deck overview icons/empty.svg" style="margin-top: -5px; margin-right:5px"> Empty'
+                ).format(base=base),
+            ]
+        )
     else:
-        links.append(["C", "studymore", _(
-            "<img src=\"{base}/user_files/assets/icons/deck overview icons/custom study.svg\" style=\"margin-top: -5px; margin-right:5px\"> Custom Study").format(base=base)])
+        links.append(
+            [
+                "C",
+                "studymore",
+                _(
+                    '<img src="{base}/user_files/assets/icons/deck overview icons/custom study.svg" style="margin-top: -5px; margin-right:5px"> Custom Study'
+                ).format(base=base),
+            ]
+        )
         # links.append(["F", "cram", _("Filter/Cram")])
     if self.mw.col.sched.haveBuried():
-        links.append(["U", "unbury", _(
-            "<img src=\"{base}/user_files/assets/icons/deck overview icons/unbury.svg\" style=\"margin-top: -5px; margin-right:5px\"> Unbury").format(base=base)])
+        links.append(
+            [
+                "U",
+                "unbury",
+                _(
+                    '<img src="{base}/user_files/assets/icons/deck overview icons/unbury.svg" style="margin-top: -5px; margin-right:5px"> Unbury'
+                ).format(base=base),
+            ]
+        )
     buf = """<style>
 
     #outer{{
      background-color: {THEME[bottombar-color]};
     }}
-     </style>""".format(THEME=THEME)
+     </style>""".format(
+        THEME=THEME
+    )
     for b in links:
         if b[0]:
             b[0] = _("Shortcut key: %s") % shortcut(b[0])
         buf += """
-<button style="background:{THEME[buttons-color]}; color:{THEME[buttons-label-color]} " class='btn btn-sm' title="%s" onclick='pycmd("%s")'>%s</button>""".format(THEME=THEME) % tuple(
+<button style="background:{THEME[buttons-color]}; color:{THEME[buttons-label-color]} " class='btn btn-sm' title="%s" onclick='pycmd("%s")'>%s</button>""".format(
+            THEME=THEME
+        ) % tuple(
             b
         )
 
     self.bottom.draw(
-        buf=buf, link_handler=self._linkHandler, web_context=OverviewBottomBar(
-            self)
+        buf=buf, link_handler=self._linkHandler, web_context=OverviewBottomBar(self)
     )
+
 
 #####################################################################################################################
 
 
 def finishedMsg(self, _old) -> str:
     return (
-        "<div class='deck-desc finish-msg animate__animated animate__rubberBand' style='background-color:{THEME[large-areas-color]};'>".format(THEME=THEME)
+        "<div class='deck-desc finish-msg animate__animated animate__rubberBand' style='background-color:{THEME[large-areas-color]};'>".format(
+            THEME=THEME
+        )
         + _("Congratulations! You have finished this deck for now.")
         + "<br></div>"
-        #+ self._nextDueMsg()
+        # + self._nextDueMsg()
     )
 
 
 def nextDueMsg(self, _old) -> str:
     line = []
 
-    #learn_msg = self.next_learn_msg()
-    #if learn_msg:
+    # learn_msg = self.next_learn_msg()
+    # if learn_msg:
     #    line.append(learn_msg)
 
     # the new line replacements are so we don't break translations
@@ -531,7 +611,9 @@ def nextDueMsg(self, _old) -> str:
 Today's review limit has been reached, but there are still cards
 waiting to be reviewed. For optimum memory, consider increasing
 the daily limit in the options.</div>"""
-            ).replace("\n", " ").format(THEME=THEME)
+            )
+            .replace("\n", " ")
+            .format(THEME=THEME)
         )
     if self.newDue():
         line.append(
@@ -542,7 +624,9 @@ There are more new cards available, but the daily limit has been
 reached. You can increase the limit in the options, but please
 bear in mind that the more new cards you introduce, the higher
 your short-term review workload will become.</div>"""
-            ).replace("\n", " ").format(THEME=THEME)
+            )
+            .replace("\n", " ")
+            .format(THEME=THEME)
         )
     if self.haveBuried():
         if self.haveCustomStudy:
@@ -553,7 +637,9 @@ your short-term review workload will become.</div>"""
             _(
                 """\
 <div class=' animate__animated animate__fadeInUp animate__slow deck-desc lighten-4' style='background-color:{THEME[large-areas-color]}'>
-Some related or buried cards were delayed until a later session.</div>""".format(THEME=THEME)
+Some related or buried cards were delayed until a later session.</div>""".format(
+                    THEME=THEME
+                )
             )
             + now
         )
@@ -562,22 +648,23 @@ Some related or buried cards were delayed until a later session.</div>""".format
             _(
                 """\
 <div class=' animate__animated animate__fadeInUp animate__slow deck-desc lighten-4' style='background-color:{THEME[large-areas-color]}'>
- To study outside of the normal schedule, click the Custom Study button below.</div>""".format(THEME=THEME)
+ To study outside of the normal schedule, click the Custom Study button below.</div>""".format(
+                    THEME=THEME
+                )
             )
-            )
+        )
 
     return "".join(line)
 
 
 #####################################################################################################################
 
-def updateRenderingDeckOverview():
 
+def updateRenderingDeckOverview():
     Overview._desc = wrap(Overview._desc, desc, "around")
     Overview._renderPage = wrap(Overview._renderPage, renderPage, "around")
     Overview._table = table
-    Overview._renderBottom = wrap(
-        Overview._renderBottom, renderDeckBottom, "around")
+    Overview._renderBottom = wrap(Overview._renderBottom, renderDeckBottom, "around")
 
     Scheduler._nextDueMsg = wrap(Scheduler._nextDueMsg, nextDueMsg, "around")
     Scheduler.finishedMsg = wrap(Scheduler.finishedMsg, finishedMsg, "around")

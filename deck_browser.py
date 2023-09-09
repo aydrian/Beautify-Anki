@@ -31,14 +31,14 @@ from anki.hooks import wrap
 import anki.sched, anki.schedv2
 from anki.lang import _, ngettext
 from aqt import mw
-from aqt.deckbrowser import DeckBrowser , DeckBrowserBottomBar , RenderDeckNodeContext
-from aqt.toolbar import Toolbar , BottomBar
+from aqt.deckbrowser import DeckBrowser, DeckBrowserBottomBar, RenderDeckNodeContext
+from aqt.toolbar import Toolbar, BottomBar
 from aqt.reviewer import Reviewer
 from aqt.utils import *
 
 
 from aqt import AnkiQt, gui_hooks
-from aqt.utils import shortcut 
+from aqt.utils import shortcut
 from copy import deepcopy
 from .config import *
 
@@ -48,14 +48,15 @@ from anki.rsbackend import TR, DeckTreeNode
 bg_animation = CONFIG["animation"]
 
 
-
-
 def init(self, mw: AnkiQt) -> None:
     self.mw = mw
     self.web = mw.web
     self.scrollPos = QPoint(0, 0)
 
+
 CountTimesNew = 2
+
+
 def renderStats(self, _old):
     # Get due and new cards
     new = 0
@@ -67,22 +68,22 @@ def renderStats(self, _old):
         lrn += tree[3]
         due += tree[2]
 
-    total = (CountTimesNew*new) + lrn + due
+    total = (CountTimesNew * new) + lrn + due
     totalDisplay = new + lrn + due
 
     # Get studdied cards
     cards, thetime = self.mw.col.db.first(
-            """select count(), sum(time)/1000 from revlog where id > ?""",
-            (self.mw.col.sched.dayCutoff - 86400) * 1000)
+        """select count(), sum(time)/1000 from revlog where id > ?""",
+        (self.mw.col.sched.dayCutoff - 86400) * 1000,
+    )
 
-    cards   = cards or 0
+    cards = cards or 0
     thetime = thetime or 0
 
-    speed   = cards * 60 / max(1, thetime)
-    minutes = int(total / max(1, speed))             
+    speed = cards * 60 / max(1, thetime)
+    minutes = int(total / max(1, speed))
 
-    
-    buf="""
+    buf = """
     
 
 
@@ -204,29 +205,43 @@ def renderStats(self, _old):
     </div>
 
     </div></div>
-    """.format( str(ngettext("%s <br>  {LOCALS[minute]} ".format( LOCALS=LOCALS), "%s <br>  {LOCALS[minutes]}".format( LOCALS=LOCALS), minutes) % (minutes)),
-        old_stats=_old(self), speed=speed,
-        new_count=new,due_count=lrn+due,learn_count=lrn,review_count=due,
-        total_cards=totalDisplay,BROWSER=BROWSER , LOCALS=LOCALS , base=base)
-    
-  
+    """.format(
+        str(
+            ngettext(
+                "%s <br>  {LOCALS[minute]} ".format(LOCALS=LOCALS),
+                "%s <br>  {LOCALS[minutes]}".format(LOCALS=LOCALS),
+                minutes,
+            )
+            % (minutes)
+        ),
+        old_stats=_old(self),
+        speed=speed,
+        new_count=new,
+        due_count=lrn + due,
+        learn_count=lrn,
+        review_count=due,
+        total_cards=totalDisplay,
+        BROWSER=BROWSER,
+        LOCALS=LOCALS,
+        base=base,
+    )
+
     return buf
 
 
+def renderDeckTree(self, top: DeckTreeNode, _old) -> str:
+    buf = ""
+    buf += self._topLevelDragRow()
 
-def renderDeckTree(self, top: DeckTreeNode,_old) -> str:
-        buf = ""
-        buf += self._topLevelDragRow()
+    ctx = RenderDeckNodeContext(current_deck_id=self.mw.col.conf["curDeck"])
 
-        ctx = RenderDeckNodeContext(current_deck_id=self.mw.col.conf["curDeck"])
+    for child in top.children:
+        buf += self._render_deck_node(child, ctx)
 
-        for child in top.children:
-            buf += self._render_deck_node(child, ctx)
-
-        return buf
+    return buf
 
 
-def render_deck_node(self, node: DeckTreeNode, ctx: RenderDeckNodeContext,_old) -> str:
+def render_deck_node(self, node: DeckTreeNode, ctx: RenderDeckNodeContext, _old) -> str:
     if node.collapsed:
         prefix = "+"
     else:
@@ -242,7 +257,10 @@ def render_deck_node(self, node: DeckTreeNode, ctx: RenderDeckNodeContext,_old) 
     else:
         klass = "deck"
 
-    buf = "<tr class='deck-row row align-items-center  %s' id='%d'>" % (klass, node.deck_id)
+    buf = "<tr class='deck-row row align-items-center  %s' id='%d'>" % (
+        klass,
+        node.deck_id,
+    )
     # deck link
     if node.children:
         collapse = (
@@ -269,6 +287,7 @@ def render_deck_node(self, node: DeckTreeNode, ctx: RenderDeckNodeContext,_old) 
         node.deck_id,
         node.name,
     )
+
     # due counts
     def nonzeroColour(cnt, klass):
         if not cnt:
@@ -281,14 +300,19 @@ def render_deck_node(self, node: DeckTreeNode, ctx: RenderDeckNodeContext,_old) 
     )
     # options
     buf += (
-        "<td  class='opts col col-1'><a onclick='return pycmd(\"opts:%d\");'>".format(THEME=THEME) % node.deck_id
+        "<td  class='opts col col-1'><a onclick='return pycmd(\"opts:%d\");'>".format(
+            THEME=THEME
+        )
+        % node.deck_id
     )
-    buf+= """
+    buf += """
     <svg width="1em" height="1em" viewBox="0 0 16 16" class="bi bi-gear-fill" fill="{THEME[gear-icon-color]}" xmlns="http://www.w3.org/2000/svg">
     <path fill-rule="evenodd" d="M9.405 1.05c-.413-1.4-2.397-1.4-2.81 0l-.1.34a1.464 1.464 0 0 1-2.105.872l-.31-.17c-1.283-.698-2.686.705-1.987 1.987l.169.311c.446.82.023 1.841-.872 2.105l-.34.1c-1.4.413-1.4 2.397 0 2.81l.34.1a1.464 1.464 0 0 1 .872 2.105l-.17.31c-.698 1.283.705 2.686 1.987 1.987l.311-.169a1.464 1.464 0 0 1 2.105.872l.1.34c.413 1.4 2.397 1.4 2.81 0l.1-.34a1.464 1.464 0 0 1 2.105-.872l.31.17c1.283.698 2.686-.705 1.987-1.987l-.169-.311a1.464 1.464 0 0 1 .872-2.105l.34-.1c1.4-.413 1.4-2.397 0-2.81l-.34-.1a1.464 1.464 0 0 1-.872-2.105l.17-.31c.698-1.283-.705-2.686-1.987-1.987l-.311.169a1.464 1.464 0 0 1-2.105-.872l-.1-.34zM8 10.93a2.929 2.929 0 1 0 0-5.86 2.929 2.929 0 0 0 0 5.858z"/>
     </svg>
     </a></td></tr>
-    """.format(THEME=THEME)
+    """.format(
+        THEME=THEME
+    )
     # children
     if not node.collapsed:
         for child in node.children:
@@ -298,58 +322,71 @@ def render_deck_node(self, node: DeckTreeNode, ctx: RenderDeckNodeContext,_old) 
 
 sharedIcon = """
 <img src="{base}/user_files/assets/icons/deck browser icons/get shared.svg" style="margin-top: -5px; margin-right:5px">
-""".format(base=base)
+""".format(
+    base=base
+)
 
-creatDeckIcon ="""
+creatDeckIcon = """
 <img src="{base}/user_files/assets/icons/deck browser icons/create deck.svg" style="margin-top: -5px; margin-right:5px">
-""".format(base=base)
+""".format(
+    base=base
+)
 
 importFileIcon = """
 <img src="{base}/user_files/assets/icons/deck browser icons/import file.svg" style="margin-top: -5px; margin-right:5px">
-""".format(base=base)
+""".format(
+    base=base
+)
 
 DeckBrowser.drawLinks = [
-        ["", "shared", _("{sharedIcon} Get Shared ".format(sharedIcon=sharedIcon))],
-        ["", "create", _("{creatDeckIcon}Create Deck".format(creatDeckIcon=creatDeckIcon))],
-        ["Ctrl+I", "import", _("{importFileIcon} Import File".format(importFileIcon=importFileIcon))], 
-    ]
+    ["", "shared", _("{sharedIcon} Get Shared ".format(sharedIcon=sharedIcon))],
+    ["", "create", _("{creatDeckIcon}Create Deck".format(creatDeckIcon=creatDeckIcon))],
+    [
+        "Ctrl+I",
+        "import",
+        _("{importFileIcon} Import File".format(importFileIcon=importFileIcon)),
+    ],
+]
 
-def drawButtons(self,_old):
+
+def drawButtons(self, _old):
     buf = """<style> 
     
     #outer{{
   background-color: {THEME[bottombar-color]} ;
   background-image:unset !important;
     }}
-     </style>""".format(THEME=THEME)
+     </style>""".format(
+        THEME=THEME
+    )
     drawLinks = deepcopy(self.drawLinks)
     for b in drawLinks:
         if b[0]:
             b[0] = _("Shortcut key: %s") % shortcut(b[0])
         buf += """
-<button type="button" class='btn btn-sm' style="background:{THEME[buttons-color]}; color:{THEME[buttons-label-color]} " title='%s' onclick='pycmd(\"%s\");'> %s </button>""".format(THEME=THEME) %  tuple(
+<button type="button" class='btn btn-sm' style="background:{THEME[buttons-color]}; color:{THEME[buttons-label-color]} " title='%s' onclick='pycmd(\"%s\");'> %s </button>""".format(
+            THEME=THEME
+        ) % tuple(
             b
         )
     self.bottom.draw(
-        
         buf=buf,
         link_handler=self._linkHandler,
         web_context=DeckBrowserBottomBar(self),
     )
 
 
-
-
-
-Toolbar. _body = """
+Toolbar._body = """
 <nav style="font-size:12px ; text-align:{THEME[topbar-position]};background-color:{THEME[topbar-color]}"  width=100%%>
 <tr>
 <td class=tdcenter'>%s</td>
 </tr></nav>
-""".format(THEME=THEME)
+""".format(
+    THEME=THEME
+)
 
 animation = ""
-if bg_animation :
+if bg_animation:
     animation = """
     <script>
     
@@ -364,7 +401,7 @@ if bg_animation :
 
     """
 else:
-    animation ="""
+    animation = """
     <style>
     body{
         background-image: url('%s/user_files/assets/background.jpg') !important ; 
@@ -372,12 +409,14 @@ else:
 
     }
     </style>
-    """%(base)
+    """ % (
+        base
+    )
 
 
-heatmapStyle=""
+heatmapStyle = ""
 if THEME["heatmap-background"]:
-    heatmapStyle="""
+    heatmapStyle = """
         .rh-container{{
             background-color: {THEME[large-areas-color]};
             width:96.5%%;
@@ -391,8 +430,10 @@ if THEME["heatmap-background"]:
             background-color: {THEME[large-areas-color]};
             padding:10px;
         }}
-     """.format(THEME=THEME)
-     
+     """.format(
+        THEME=THEME
+    )
+
 if HEATMAP_POSITION == "right":
     heatmap_script = """
 <script>
@@ -408,7 +449,7 @@ window.addEventListener('load',
 </script>
     """
 else:
-    heatmap_script =""
+    heatmap_script = ""
 
 
 main_bg = """
@@ -469,7 +510,9 @@ a.deck , .collapseable{{
 
 {heatmapStyle}
 
-""".format(THEME=THEME,BROWSER=BROWSER, base=base , heatmapStyle=heatmapStyle)
+""".format(
+    THEME=THEME, BROWSER=BROWSER, base=base, heatmapStyle=heatmapStyle
+)
 
 
 DeckBrowser._body = """
@@ -498,13 +541,24 @@ DeckBrowser._body = """
 {heatmap_script}
 
 
-""".format(animation=animation,THEME=THEME,main_bg=main_bg,BROWSER=BROWSER,TABLE_WIDTH=TABLE_WIDTH,STATS_WIDTH=STATS_WIDTH,HEATMAP_WIDTH=HEATMAP_WIDTH,heatmap_script=heatmap_script)
+""".format(
+    animation=animation,
+    THEME=THEME,
+    main_bg=main_bg,
+    BROWSER=BROWSER,
+    TABLE_WIDTH=TABLE_WIDTH,
+    STATS_WIDTH=STATS_WIDTH,
+    HEATMAP_WIDTH=HEATMAP_WIDTH,
+    heatmap_script=heatmap_script,
+)
 
-def updateRenderingMethods():   
 
-    DeckBrowser._renderDeckTree = wrap(DeckBrowser._renderDeckTree , renderDeckTree, "around")
-    DeckBrowser._render_deck_node = wrap(DeckBrowser._render_deck_node, render_deck_node, 'around')
-    DeckBrowser._drawButtons = wrap(DeckBrowser._drawButtons, drawButtons, 'around')
-    DeckBrowser._renderStats = wrap(DeckBrowser._renderStats, renderStats, 'around')
-    
-    
+def updateRenderingMethods():
+    DeckBrowser._renderDeckTree = wrap(
+        DeckBrowser._renderDeckTree, renderDeckTree, "around"
+    )
+    DeckBrowser._render_deck_node = wrap(
+        DeckBrowser._render_deck_node, render_deck_node, "around"
+    )
+    DeckBrowser._drawButtons = wrap(DeckBrowser._drawButtons, drawButtons, "around")
+    DeckBrowser._renderStats = wrap(DeckBrowser._renderStats, renderStats, "around")

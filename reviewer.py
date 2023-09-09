@@ -26,7 +26,7 @@ Copyright (c) 2020 Shorouk Abdelaziz (https://shorouk.dev)
 #                                                                               #
 #################################################################################
 from anki.hooks import wrap
-from aqt import  gui_hooks
+from aqt import gui_hooks
 from aqt.reviewer import Reviewer
 from aqt.utils import *
 import json
@@ -53,7 +53,9 @@ def bottomHTML(self):
 <script>
 time = %(time)d;
 </script>
-""".format(THEME=THEME) % dict(
+""".format(
+        THEME=THEME
+    ) % dict(
         rem=self._remaining(),
         edit=_("Edit"),
         editkey=_("Shortcut key: %s") % "E",
@@ -62,30 +64,27 @@ time = %(time)d;
         time=self.card.timeTaken() // 1000,
     )
 
+
 def showAnswerButton(self):
     if not self.typeCorrect:
         self.mw.web.setFocus()
     middle = """
 <span class=stattxt>%s</span><br>
-<button style='color: {THEME[buttons-label-color]} ;background-color:{THEME[buttons-color]}' class='btn btn-sm' title="%s" id=ansbut onclick='pycmd("ans");'>%s</button>""".format(THEME=THEME) % (
+<button style='color: {THEME[buttons-label-color]} ;background-color:{THEME[buttons-color]}' class='btn btn-sm' title="%s" id=ansbut onclick='pycmd("ans");'>%s</button>""".format(
+        THEME=THEME
+    ) % (
         self._remaining(),
         _("Shortcut key: %s") % _("Space"),
         _("Show Answer"),
     )
     # wrap it in a table so it has the same top margin as the ease buttons
-    middle = (
-        "<tr><td class=stat2 align=center>%s</td></tr>"
-        % middle
-    )
+    middle = "<tr><td class=stat2 align=center>%s</td></tr>" % middle
     if self.card.shouldShowTimer():
         maxTime = self.card.time_limit() / 1000
     else:
         maxTime = 0
     self.bottom.web.eval("showQuestion(%s,%d);" % (json.dumps(middle), maxTime))
     self.bottom.web.adjustHeightToFit()
-
-
-
 
 
 def answerButtons(self):
@@ -97,7 +96,7 @@ def answerButtons(self):
         else:
             extra = ""
         due = self._buttonTime(i)
-        
+
         return """
 <td align=center>%s<button class='btn btn-sm ' %s title="%s" data-ease="%s" onclick='pycmd("ease%d");'>\
 %s</button></td>""" % (
@@ -119,7 +118,6 @@ def answerButtons(self):
 
 
 def renderReviewer():
-    Reviewer._bottomHTML = wrap (Reviewer._bottomHTML , bottomHTML)
-    Reviewer._showAnswerButton = wrap (Reviewer._showAnswerButton , showAnswerButton)
-    Reviewer._answerButtons = wrap (Reviewer._answerButtons , answerButtons)
-    
+    Reviewer._bottomHTML = wrap(Reviewer._bottomHTML, bottomHTML)
+    Reviewer._showAnswerButton = wrap(Reviewer._showAnswerButton, showAnswerButton)
+    Reviewer._answerButtons = wrap(Reviewer._answerButtons, answerButtons)

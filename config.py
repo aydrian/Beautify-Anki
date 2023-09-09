@@ -27,42 +27,47 @@ Copyright (c) 2020 Shorouk Abdelaziz (https://shorouk.dev)
 #################################################################################
 
 from aqt import mw
-import os , sys
+import os, sys
 from aqt.utils import showInfo
 from aqt.theme import theme_manager
 import json
 
 
 addon = mw.addonManager.addonFromModule(__name__)
-base="/_addons/"+addon
+base = "/_addons/" + addon
 
 
 NIHGT_MODE = theme_manager.night_mode
 CONFIG = mw.addonManager.getConfig(__name__)
 
 ADDON = os.path.dirname(os.path.abspath(__file__)).replace("\\", "/")
-USERTHEMEFILE = ADDON+"/user_files/theme_settings/"+CONFIG["theme"]+'.json'
+USERTHEMEFILE = ADDON + "/user_files/theme_settings/" + CONFIG["theme"] + ".json"
 
 with open(USERTHEMEFILE) as json_file:
     THEME = json.load(json_file)
 
     BROWSER = THEME["DECK-BROWSER"]
     PIE = THEME["DECK-OVERVIEW"]["PIE-CHART"]
-    OVERVIEW =THEME["DECK-OVERVIEW"]
-    change_in_night = ["large-areas-color","decks-border-color","decks-font-color","filtered-deck-color","gear-icon-color"]
+    OVERVIEW = THEME["DECK-OVERVIEW"]
+    change_in_night = [
+        "large-areas-color",
+        "decks-border-color",
+        "decks-font-color",
+        "filtered-deck-color",
+        "gear-icon-color",
+    ]
     if CONFIG["theme"] == "default" and NIHGT_MODE:
-        for value in change_in_night :
+        for value in change_in_night:
             THEME[value] = THEME["night"][value]
 
 
-
-LOCALS= CONFIG["local"]
+LOCALS = CONFIG["local"]
 
 HEATMAP_POSITION = CONFIG["heatmap_position"]
 if HEATMAP_POSITION == "right":
     STATS_WIDTH = "col-lg-5"
     TABLE_WIDTH = "col-lg-7"
-    HEATMAP_WIDTH = "\"col\", \"col-12\", \"col-md-5\""
+    HEATMAP_WIDTH = '"col", "col-12", "col-md-5"'
 else:
     STATS_WIDTH = "col-lg-4"
     TABLE_WIDTH = "col-lg-8"

@@ -27,10 +27,10 @@ Copyright (c) 2020 Shorouk Abdelaziz (https://shorouk.dev)
 #################################################################################
 
 from .deck_browser import updateRenderingMethods
-from .deck_overview import updateRenderingDeckOverview 
+from .deck_overview import updateRenderingDeckOverview
 from .reviewer import renderReviewer
 import aqt
-from aqt import  gui_hooks
+from aqt import gui_hooks
 from typing import Optional, Any
 from .config import *
 
@@ -44,56 +44,69 @@ if CONFIG["change answer buttons"]:
 
 
 addon = mw.addonManager.addonFromModule(__name__)
-base="/_addons/"+addon
+base = "/_addons/" + addon
 
 # add the assests folder to the media server
-mw.addonManager.setWebExports(__name__, r"user_files/assets/.+(\.svg|\.png|\.css|\.woff|\woff2|\.jpeg|\.gif|\.tiff|\.bmp|\.jpg|\.js|\.TTF|\.ttf|\.otf)")
+mw.addonManager.setWebExports(
+    __name__,
+    r"user_files/assets/.+(\.svg|\.png|\.css|\.woff|\woff2|\.jpeg|\.gif|\.tiff|\.bmp|\.jpg|\.js|\.TTF|\.ttf|\.otf)",
+)
 
 
-# add my css and js 
-def on_webview_will_set_content (web_content: aqt.webview.WebContent,  context: Optional[Any]):
-    
+# add my css and js
+def on_webview_will_set_content(
+    web_content: aqt.webview.WebContent, context: Optional[Any]
+):
     # add css and js to all contexts
-    if  isinstance(context, (
-        aqt.deckbrowser.DeckBrowser ,aqt.overview.Overview,aqt.toolbar.TopToolbar ,
-         aqt.deckbrowser.DeckBrowserBottomBar , aqt.overview.OverviewBottomBar)) :        
-      
+    if isinstance(
+        context,
+        (
+            aqt.deckbrowser.DeckBrowser,
+            aqt.overview.Overview,
+            aqt.toolbar.TopToolbar,
+            aqt.deckbrowser.DeckBrowserBottomBar,
+            aqt.overview.OverviewBottomBar,
+        ),
+    ):
         if CONFIG["animation"]:
-            web_content.css.append (base+"/user_files/assets/css/animate.css")
+            web_content.css.append(base + "/user_files/assets/css/animate.min.css")
 
-        web_content.css.append (base+"/user_files/assets/css/bootstrap.min.css")
-        web_content.css.append (base+"/user_files/assets/css/universal.css")
-        
+        web_content.css.append(base + "/user_files/assets/css/bootstrap.min.css")
+        web_content.css.append(base + "/user_files/assets/css/universal.css")
 
-        
-        
     # add css and js to deck overview
-    if  isinstance(context, aqt.overview.Overview):        
-        web_content.css.append (base+"/user_files/assets/css/overview.css")
+    if isinstance(context, aqt.overview.Overview):
+        web_content.css.append(base + "/user_files/assets/css/overview.css")
         web_content.css.remove("overview.css")
         web_content.css.remove("css/webview.css")
-        web_content.js.append (base+"/user_files/assets/js/plotly-latest.min.js")  
+        web_content.js.append(base + "/user_files/assets/js/plotly-latest.min.js")
 
     # add css and js to deck browser
-    if  isinstance(context, aqt.deckbrowser.DeckBrowser):        
-        web_content.css.append (base+"/user_files/assets/css/deckbrowser.css")
+    if isinstance(context, aqt.deckbrowser.DeckBrowser):
+        web_content.css.append(base + "/user_files/assets/css/deckbrowser.css")
         web_content.css.remove("css/deckbrowser.css")
-    
+
     # add css and js to deck browser bottom bar
-    if isinstance (context , ( aqt.deckbrowser.DeckBrowserBottomBar,aqt.overview.OverviewBottomBar)):        
-        web_content.css.append (base+"/user_files/assets/css/bottombar.css")
+    if isinstance(
+        context, (aqt.deckbrowser.DeckBrowserBottomBar, aqt.overview.OverviewBottomBar)
+    ):
+        web_content.css.append(base + "/user_files/assets/css/bottombar.css")
         web_content.css.remove("css/webview.css")
 
-        if NIHGT_MODE:         
-            web_content.css.append (base+"/user_files/assets/css/bottombar_dark.css")
+        if NIHGT_MODE:
+            web_content.css.append(base + "/user_files/assets/css/bottombar_dark.css")
 
     # add css and js to top bar
-    if isinstance (context ,  aqt.toolbar.TopToolbar):
-        web_content.css.append (base+"/user_files/assets/css/toolbar.css")
-    
+    if isinstance(context, aqt.toolbar.TopToolbar):
+        web_content.css.append(base + "/user_files/assets/css/toolbar.css")
+
     # add css and js to reviewer bottom bar
-    if isinstance (context , aqt.reviewer.ReviewerBottomBar) and CONFIG["change answer buttons"]:
-      web_content.css.append (base+"/user_files/assets/css/reviewer_bottom.css")
-      web_content.css.append (base+"/user_files/assets/css/bootstrap.min.css")
+    if (
+        isinstance(context, aqt.reviewer.ReviewerBottomBar)
+        and CONFIG["change answer buttons"]
+    ):
+        web_content.css.append(base + "/user_files/assets/css/reviewer_bottom.css")
+        web_content.css.append(base + "/user_files/assets/css/bootstrap.min.css")
+
 
 gui_hooks.webview_will_set_content.append(on_webview_will_set_content)

@@ -79,7 +79,7 @@ def on_webview_will_set_content(
         web_content.css.append(base + "/user_files/assets/css/overview.css")
         web_content.css.remove("overview.css")
         web_content.css.remove("css/webview.css")
-        web_content.js.append(base + "/user_files/assets/js/plotly-latest.min.js")
+        web_content.js.append(base + "/user_files/assets/js/plotly-1.58.5.min.js")
 
     # add css and js to deck browser
     if isinstance(context, aqt.deckbrowser.DeckBrowser):

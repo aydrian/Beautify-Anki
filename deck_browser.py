@@ -26,9 +26,9 @@ Copyright (c) 2020 Shorouk Abdelaziz (https://shorouk.dev)
 #                                                                               #
 #################################################################################
 
-from anki.errors import DeckRenameError
 from anki.hooks import wrap
-import anki.sched, anki.schedv2
+
+# import anki.schedv2
 from anki.lang import _, ngettext
 from aqt import mw
 from aqt.deckbrowser import DeckBrowser, DeckBrowserBottomBar, RenderDeckNodeContext
@@ -37,7 +37,7 @@ from aqt.reviewer import Reviewer
 from aqt.utils import *
 
 
-from aqt import AnkiQt, gui_hooks
+from aqt import AnkiQt
 from aqt.utils import shortcut
 from copy import deepcopy
 from .config import *
@@ -59,14 +59,15 @@ CountTimesNew = 2
 
 def renderStats(self, _old):
     # Get due and new cards
-    new = 0
-    lrn = 0
-    due = 0
+    deck: DeckTreeNode = self.mw.col.sched.deck_due_tree()
+    new = deck.new_count
+    lrn = deck.learn_count
+    due = deck.review_count
 
-    for tree in self.mw.col.sched.deckDueTree():
-        new += tree[4]
-        lrn += tree[3]
-        due += tree[2]
+    # for tree in self.mw.col.sched.deckDueTree():
+    #     new += tree[4]
+    #     lrn += tree[3]
+    #     due += tree[2]
 
     total = (CountTimesNew * new) + lrn + due
     totalDisplay = new + lrn + due
@@ -74,7 +75,7 @@ def renderStats(self, _old):
     # Get studdied cards
     cards, thetime = self.mw.col.db.first(
         """select count(), sum(time)/1000 from revlog where id > ?""",
-        (self.mw.col.sched.dayCutoff - 86400) * 1000,
+        (self.mw.col.sched.day_cutoff - 86400) * 1000,
     )
 
     cards = cards or 0
@@ -377,13 +378,21 @@ def drawButtons(self, _old):
 
 
 Toolbar._body = """
-<nav style="font-size:12px ; text-align:{THEME[topbar-position]};background-color:{THEME[topbar-color]}"  width=100%%>
-<tr>
-<td class=tdcenter'>%s</td>
-</tr></nav>
+<div style="font-size: 12px; text-align: {THEME[topbar-position]}; background-color: {THEME[topbar-color]}" width="100%">
 """.format(
     THEME=THEME
 )
+
+toolbar_content = "<div>{toolbar_content}</div>"
+end_div = "</div>"
+
+Toolbar._body = Toolbar._body + toolbar_content + end_div
+# Toolbar. _body = """
+# <nav style="font-size:12px ; text-align:{THEME[topbar-position]};background-color:{THEME[topbar-color]}"  width=100%%>
+# <tr>
+# <td class=tdcenter'>%s</td>
+# </tr></nav>
+# """.format(THEME=THEME)
 
 animation = ""
 if bg_animation:

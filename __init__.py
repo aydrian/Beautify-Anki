@@ -26,15 +26,16 @@ Copyright (c) 2020 Shorouk Abdelaziz (https://shorouk.dev)
 #                                                                               #
 #################################################################################
 
+import aqt
+from aqt import mw
+from aqt.gui_hooks import webview_will_set_content
+
+from typing import Optional, Any
+
+from .config import *
 from .deck_browser import updateRenderingMethods
 from .deck_overview import updateRenderingDeckOverview
 from .reviewer import renderReviewer
-import aqt
-from aqt import gui_hooks
-from typing import Optional, Any
-from .config import *
-
-from aqt import mw
 
 
 updateRenderingMethods()
@@ -109,4 +110,4 @@ def on_webview_will_set_content(
         web_content.css.append(base + "/user_files/assets/css/bootstrap.min.css")
 
 
-gui_hooks.webview_will_set_content.append(on_webview_will_set_content)
+webview_will_set_content.append(on_webview_will_set_content)

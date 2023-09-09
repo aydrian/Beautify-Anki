@@ -26,7 +26,7 @@ Copyright (c) 2020 Shorouk Abdelaziz (https://shorouk.dev)
 #                                                                               #
 #################################################################################
 from anki.hooks import wrap
-from aqt import gui_hooks
+from anki.lang import _
 from aqt.reviewer import Reviewer
 from aqt.utils import *
 import json
@@ -36,19 +36,20 @@ from .config import *
 def bottomHTML(self):
     return """
 <center id=outer>
-<table id=innertable width=100%% cellspacing=0 cellpadding=0>
-<tr>
-<td align=left width=50 valign=top class=stat>
-<br>
-<button style="color: {THEME[buttons-label-color]}; background-color:{THEME[buttons-color]} "  class='btn btn-sm'title="%(editkey)s" onclick="pycmd('edit');">%(edit)s</button></td>
-<td align=center valign=top id=middle>
-</td>
-<td width=50 align=right valign=top class=stat><span id=time class=stattxt>
-</span><br>
-<button style="color: {THEME[buttons-label-color]} ; background-color:{THEME[buttons-color]} "class=' btn btn-sm' onclick="pycmd('more');">%(more)s %(downArrow)s</button>
-</td>
-</tr>
-</table>
+    <table id=innertable width=100%% cellspacing=0 cellpadding=0>
+        <tr>
+            <td align=left width=50 valign=top class=stat>
+                <br>
+                <button style="color: {THEME[buttons-label-color]}; background-color:{THEME[buttons-color]} "  class='btn btn-sm'title="%(editkey)s" onclick="pycmd('edit');">%(edit)s</button>
+            </td>
+            <td align=center valign=top id=middle>
+            </td>
+            <td width=50 align=right valign=top class=stat>
+                <span id=time class=stattxt></span><br>
+                <button style="color: {THEME[buttons-label-color]} ; background-color:{THEME[buttons-color]} "class=' btn btn-sm' onclick="pycmd('more');">%(more)s %(downArrow)s</button>
+            </td>
+        </tr>
+    </table>
 </center>
 <script>
 time = %(time)d;

@@ -26,22 +26,15 @@ Copyright (c) 2020 Shorouk Abdelaziz (https://shorouk.dev)
 #                                                                               #
 #################################################################################
 
-from typing import Optional, Any
-
-from anki.errors import DeckRenameError
 from anki.hooks import wrap
-import anki.sched
-import anki.schedv2
-from anki.schedv2 import Scheduler
+from anki.lang import _
+from anki.scheduler.v2 import Scheduler
 from aqt import mw
 from aqt.overview import Overview, OverviewContent, OverviewBottomBar
 from aqt.toolbar import Toolbar, BottomBar
 from aqt import AnkiQt, gui_hooks
 from aqt.utils import shortcut
-import aqt
 
-import json
-import os
 import time
 from datetime import date, timedelta
 import math
@@ -129,9 +122,9 @@ def table(self):
     current_deck_name = self.mw.col.decks.current()["name"]
 
     try:
-        learn_per_day = self.mw.col.decks.confForDid(self.mw.col.decks.current()["id"])[
-            "new"
-        ]["perDay"]
+        learn_per_day = self.mw.col.decks.config_dict_for_deck_id(
+            self.mw.col.decks.current()["id"]
+        )["new"]["perDay"]
     except:
         learn_per_day = 0
 
@@ -187,7 +180,7 @@ def table(self):
            then 1 else 0 end)
       from cards where did in {:s}
     """.format(
-            self.mw.col.sched._deckLimit()
+            self.mw.col.sched._deck_limit()
         ),
         round(time.time()),
     )
@@ -547,7 +540,7 @@ def renderDeckBottom(self, _old):
             ]
         )
         # links.append(["F", "cram", _("Filter/Cram")])
-    if self.mw.col.sched.haveBuried():
+    if self.mw.col.sched.have_buried():
         links.append(
             [
                 "U",
@@ -628,7 +621,7 @@ your short-term review workload will become.</div>"""
             .replace("\n", " ")
             .format(THEME=THEME)
         )
-    if self.haveBuried():
+    if self.have_buried():
         if self.haveCustomStudy:
             now = " " + _("To see them now, click the Unbury button below.")
         else:

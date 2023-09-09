@@ -3,6 +3,11 @@ body {
   font-size: 12px;
 }
 
+body.nightMode {
+  color: white;
+  background-size: 100%;
+}
+
 .decks-container {
   padding: 1%;
 }

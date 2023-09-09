@@ -378,12 +378,12 @@ def drawButtons(self, _old):
 
 
 Toolbar._body = """
-<div style="font-size: 12px; text-align: {THEME[topbar-position]}; background-color: {THEME[topbar-color]}" width="100%">
+<div class=header style="font-size: 12px; text-align: {THEME[topbar-position]}; background-color: {THEME[topbar-color]}" width="100%">
 """.format(
     THEME=THEME
 )
 
-toolbar_content = "<div>{toolbar_content}</div>"
+toolbar_content = "<div class='left-tray'></div><div class=toolbar>{toolbar_content}</div><div class='right-tray'></div>"
 end_div = "</div>"
 
 Toolbar._body = Toolbar._body + toolbar_content + end_div

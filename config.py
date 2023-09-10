@@ -57,6 +57,7 @@ with open(USERTHEMEFILE) as json_file:
         "gear-icon-color",
     ]
     if CONFIG["theme"] == "default" and NIHGT_MODE:
+        PIE = THEME["night"]["DECK-OVERVIEW"]["PIE-CHART"]
         for value in change_in_night:
             THEME[value] = THEME["night"][value]
 

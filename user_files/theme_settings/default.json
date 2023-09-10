@@ -54,6 +54,11 @@
         "decks-border-color": "rgba(56, 56, 58 , 1) ",
         "decks-font-color": "rgba(255, 255, 255, 1)",
         "filtered-deck-color": "rgba(130, 187, 240,1)",
-        "gear-icon-color": " rgba(171, 189, 198,1)"
+        "gear-icon-color": " rgba(171, 189, 198,1)",
+        "DECK-OVERVIEW": {
+            "PIE-CHART": {
+                "wedgits-font-color": "rgba(255,255,255,1)"
+            }
+        }
     }
 }

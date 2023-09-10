@@ -26,7 +26,6 @@ Copyright (c) 2020 Shorouk Abdelaziz (https://shorouk.dev)
 #                                                                               #
 #################################################################################
 from anki.hooks import wrap
-from anki.lang import _
 from aqt.reviewer import Reviewer
 from aqt.utils import *
 import json
@@ -38,15 +37,14 @@ def bottomHTML(self):
 <center id=outer>
     <table id=innertable width=100%% cellspacing=0 cellpadding=0>
         <tr>
-            <td align=left width=50 valign=top class=stat>
-                <br>
+            <td align=start width=50 valign=top class=stat>
                 <button style="color: {THEME[buttons-label-color]}; background-color:{THEME[buttons-color]} "  class='btn btn-sm'title="%(editkey)s" onclick="pycmd('edit');">%(edit)s</button>
             </td>
             <td align=center valign=top id=middle>
             </td>
-            <td width=50 align=right valign=top class=stat>
-                <span id=time class=stattxt></span><br>
+            <td width=50 align=end valign=top class=stat>
                 <button style="color: {THEME[buttons-label-color]} ; background-color:{THEME[buttons-color]} "class=' btn btn-sm' onclick="pycmd('more');">%(more)s %(downArrow)s</button>
+                <span id=time class=stattxt></span>
             </td>
         </tr>
     </table>
@@ -58,9 +56,9 @@ time = %(time)d;
         THEME=THEME
     ) % dict(
         rem=self._remaining(),
-        edit=_("Edit"),
-        editkey=_("Shortcut key: %s") % "E",
-        more=_("More"),
+        edit=tr.studying_edit(),
+        editkey=tr.actions_shortcut_key("E"),
+        more=tr.studying_more(),
         downArrow=downArrow(),
         time=self.card.timeTaken() // 1000,
     )
@@ -70,16 +68,18 @@ def showAnswerButton(self):
     if not self.typeCorrect:
         self.mw.web.setFocus()
     middle = """
-<span class=stattxt>%s</span><br>
-<button style='color: {THEME[buttons-label-color]} ;background-color:{THEME[buttons-color]}' class='btn btn-sm' title="%s" id=ansbut onclick='pycmd("ans");'>%s</button>""".format(
+        <div style='position:static;font-size:small;'>%s</div>
+<button style='color: {THEME[buttons-label-color]} ;background-color:{THEME[buttons-color]}' class='btn btn-sm' title="%s" id=ansbut onclick='pycmd("ans");'>
+    %s
+</button>""".format(
         THEME=THEME
     ) % (
+        tr.actions_shortcut_key("Space"),
+        tr.studying_show_answer(),
         self._remaining(),
-        _("Shortcut key: %s") % _("Space"),
-        _("Show Answer"),
     )
     # wrap it in a table so it has the same top margin as the ease buttons
-    middle = "<tr><td class=stat2 align=center>%s</td></tr>" % middle
+    middle = "<tr><td class=stat align=center>%s</td></tr>" % middle
     if self.card.shouldShowTimer():
         maxTime = self.card.time_limit() / 1000
     else:
@@ -103,7 +103,7 @@ def answerButtons(self):
 %s</button></td>""" % (
             due,
             extra,
-            _("Shortcut key: %s") % i,
+            tr.actions_shortcut_key(i),
             i,
             i,
             label,

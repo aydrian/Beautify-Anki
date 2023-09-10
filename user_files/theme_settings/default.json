@@ -32,9 +32,9 @@
         "total-wedgit-bg": "rgba(94, 53, 177,0.8)"
     },
     "DECK-OVERVIEW": {
-        "deck-name-font-size": "70px",
-        "deck-name-font-family": "fantasy",
-        "deck-name-font-src": "",
+        "deck-name-font-size": "36px",
+        "deck-name-font-family": "Raleway",
+        "deck-name-font-src": "Raleway.ttf",
         "wedgits-font-size": "13px",
         "wedgits-font-family": "Raleway",
         "wedgits-font-src": "Raleway.ttf",

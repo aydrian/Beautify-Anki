@@ -27,7 +27,6 @@ Copyright (c) 2020 Shorouk Abdelaziz (https://shorouk.dev)
 #################################################################################
 
 from anki.hooks import wrap
-from anki.lang import _
 from anki.scheduler.v2 import Scheduler
 from aqt import mw
 from aqt.overview import Overview, OverviewContent, OverviewBottomBar
@@ -38,7 +37,7 @@ from aqt.utils import shortcut
 import time
 from datetime import date, timedelta
 import math
-from aqt.utils import showInfo
+from aqt.utils import showInfo, tr
 
 
 from copy import deepcopy
@@ -74,10 +73,8 @@ def desc(self, deck, _old):
             """.format(
             button=button(
                 "study",
-                _(
-                    '<img style="margin-top: -5px; margin-right:5px" src="{base}/user_files/assets/icons/deck overview icons/study now.svg" > Study Now'.format(
-                        base=base
-                    )
+                '<img style="margin-top: -5px; margin-right:5px" src="{base}/user_files/assets/icons/deck overview icons/study now.svg" >{text}'.format(
+                    base=base, text=tr.studying_study_now()
                 ),
                 id="study",
                 class_="btn btn-lg",
@@ -406,7 +403,7 @@ def renderPage(self, _old):
     self.web.stdHtml(
         self._body % content.__dict__,
         css=["overview.css"],
-        js=["jquery.js", "overview.js"],
+        js=["js/vendor/jquery.min.js", "js/vendor/overview.js"],
         context=self,
     )
 
@@ -505,9 +502,9 @@ def renderDeckBottom(self, _old):
         [
             "O",
             "opts",
-            _(
-                '<img src="{base}/user_files/assets/icons/deck overview icons/options.svg" style="margin-top: -5px; margin-right:5px"> Options'
-            ).format(base=base),
+            '<img src="{base}/user_files/assets/icons/deck overview icons/options.svg" style="margin-top: -5px; margin-right:5px">{text}'.format(
+                base=base, text=tr.actions_options()
+            ),
         ],
     ]
     if self.mw.col.decks.current()["dyn"]:
@@ -515,18 +512,18 @@ def renderDeckBottom(self, _old):
             [
                 "R",
                 "refresh",
-                _(
-                    '<img src="{base}/user_files/assets/icons/deck overview icons/rebuild.svg" style="margin-top: -5px; margin-right:5px"> Rebuild'
-                ).format(base=base),
+                '<img src="{base}/user_files/assets/icons/deck overview icons/rebuild.svg" style="margin-top: -5px; margin-right:5px">{text}'.format(
+                    base=base, text=tr.actions_rebuild()
+                ),
             ]
         )
         links.append(
             [
                 "E",
                 "empty",
-                _(
-                    '<img src="{base}/user_files/assets/icons/deck overview icons/empty.svg" style="margin-top: -5px; margin-right:5px"> Empty'
-                ).format(base=base),
+                '<img src="{base}/user_files/assets/icons/deck overview icons/empty.svg" style="margin-top: -5px; margin-right:5px"> Empty'.format(
+                    base=base, text=tr.studying_empty()
+                ),
             ]
         )
     else:
@@ -534,9 +531,9 @@ def renderDeckBottom(self, _old):
             [
                 "C",
                 "studymore",
-                _(
-                    '<img src="{base}/user_files/assets/icons/deck overview icons/custom study.svg" style="margin-top: -5px; margin-right:5px"> Custom Study'
-                ).format(base=base),
+                '<img src="{base}/user_files/assets/icons/deck overview icons/custom study.svg" style="margin-top: -5px; margin-right:5px">{text}'.format(
+                    base=base, text=tr.actions_custom_study()
+                ),
             ]
         )
         # links.append(["F", "cram", _("Filter/Cram")])
@@ -545,9 +542,9 @@ def renderDeckBottom(self, _old):
             [
                 "U",
                 "unbury",
-                _(
-                    '<img src="{base}/user_files/assets/icons/deck overview icons/unbury.svg" style="margin-top: -5px; margin-right:5px"> Unbury'
-                ).format(base=base),
+                '<img src="{base}/user_files/assets/icons/deck overview icons/unbury.svg" style="margin-top: -5px; margin-right:5px">{text}'.format(
+                    base=base, text=tr.studying_unbury()
+                ),
             ]
         )
     buf = """<style>
@@ -560,7 +557,7 @@ def renderDeckBottom(self, _old):
     )
     for b in links:
         if b[0]:
-            b[0] = _("Shortcut key: %s") % shortcut(b[0])
+            b[0] = tr.actions_shortcut_key(shortcut(b[0]))
         buf += """
 <button style="background:{THEME[buttons-color]}; color:{THEME[buttons-label-color]} " class='btn btn-sm' title="%s" onclick='pycmd("%s")'>%s</button>""".format(
             THEME=THEME
@@ -581,7 +578,7 @@ def finishedMsg(self, _old) -> str:
         "<div class='deck-desc finish-msg animate__animated animate__rubberBand' style='background-color:{THEME[large-areas-color]};'>".format(
             THEME=THEME
         )
-        + _("Congratulations! You have finished this deck for now.")
+        + tr.scheduling_congratulations_finished()
         + "<br></div>"
         # + self._nextDueMsg()
     )
@@ -598,53 +595,45 @@ def nextDueMsg(self, _old) -> str:
     # in a point release
     if self.revDue():
         line.append(
-            _(
-                """\
-<div class=' animate__animated animate__fadeInUp animate__slow deck-desc' style='background-color:{THEME[large-areas-color]}'>
-Today's review limit has been reached, but there are still cards
-waiting to be reviewed. For optimum memory, consider increasing
-the daily limit in the options.</div>"""
+            """\
+<div class='animate__animated animate__fadeInUp animate__slow deck-desc' style='background-color:{THEME[large-areas-color]}'>{text}</div>""".replace(
+                "\n", " "
+            ).format(
+                THEME=THEME, text=tr.scheduling_today_review_limit_reached()
             )
-            .replace("\n", " ")
-            .format(THEME=THEME)
         )
     if self.newDue():
         line.append(
-            _(
-                """\
+            """\
 <div class=' animate__animated animate__fadeInUp animate__slow deck-desc' style='background-color:{THEME[large-areas-color]}'>
-There are more new cards available, but the daily limit has been
-reached. You can increase the limit in the options, but please
-bear in mind that the more new cards you introduce, the higher
-your short-term review workload will become.</div>"""
+{text}</div>""".replace(
+                "\n", " "
+            ).format(
+                THEME=THEME, text=tr.scheduling_today_new_limit_reached()
             )
-            .replace("\n", " ")
-            .format(THEME=THEME)
         )
     if self.have_buried():
         if self.haveCustomStudy:
-            now = " " + _("To see them now, click the Unbury button below.")
+            now = (
+                " " + "To see them now, click the Unbury button below."
+            )  ## TODO: Translate
         else:
             now = ""
         line.append(
-            _(
-                """\
+            """\
 <div class=' animate__animated animate__fadeInUp animate__slow deck-desc lighten-4' style='background-color:{THEME[large-areas-color]}'>
 Some related or buried cards were delayed until a later session.</div>""".format(
-                    THEME=THEME
-                )
-            )
+                THEME=THEME
+            )  ## TODO: Translate
             + now
         )
     if self.haveCustomStudy and not self.col.decks.current()["dyn"]:
         line.append(
-            _(
-                """\
+            """\
 <div class=' animate__animated animate__fadeInUp animate__slow deck-desc lighten-4' style='background-color:{THEME[large-areas-color]}'>
  To study outside of the normal schedule, click the Custom Study button below.</div>""".format(
-                    THEME=THEME
-                )
-            )
+                THEME=THEME
+            )  ## TODO: Translate
         )
 
     return "".join(line)

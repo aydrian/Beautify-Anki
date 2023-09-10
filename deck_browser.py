@@ -29,7 +29,6 @@ Copyright (c) 2020 Shorouk Abdelaziz (https://shorouk.dev)
 from anki.hooks import wrap
 
 # import anki.schedv2
-from anki.lang import _, ngettext
 from aqt import mw
 from aqt.deckbrowser import DeckBrowser, DeckBrowserBottomBar, RenderDeckNodeContext
 from aqt.toolbar import Toolbar, BottomBar
@@ -49,7 +48,6 @@ bg_animation = CONFIG["animation"]
 
 
 def init(self, mw: AnkiQt) -> None:
-    self.mw = mw
     self.web = mw.web
     self.scrollPos = QPoint(0, 0)
 
@@ -207,14 +205,7 @@ def renderStats(self, _old):
 
     </div></div>
     """.format(
-        str(
-            ngettext(
-                "%s <br>  {LOCALS[minute]} ".format(LOCALS=LOCALS),
-                "%s <br>  {LOCALS[minutes]}".format(LOCALS=LOCALS),
-                minutes,
-            )
-            % (minutes)
-        ),
+        tr.scheduling_time_span_minutes(minutes),
         old_stats=_old(self),
         speed=speed,
         new_count=new,
@@ -226,6 +217,7 @@ def renderStats(self, _old):
         LOCALS=LOCALS,
         base=base,
     )
+    tr.decks_minutes()
 
     return buf
 
@@ -340,12 +332,24 @@ importFileIcon = """
 )
 
 DeckBrowser.drawLinks = [
-    ["", "shared", _("{sharedIcon} Get Shared ".format(sharedIcon=sharedIcon))],
-    ["", "create", _("{creatDeckIcon}Create Deck".format(creatDeckIcon=creatDeckIcon))],
     [
-        "Ctrl+I",
+        "",
+        "shared",
+        "{sharedIcon} {text}".format(sharedIcon=sharedIcon, text=tr.decks_get_shared()),
+    ],
+    [
+        "",
+        "create",
+        "{creatDeckIcon} {text}".format(
+            creatDeckIcon=creatDeckIcon, text=tr.decks_create_deck()
+        ),
+    ],
+    [
+        "Ctrl+Shift+I",
         "import",
-        _("{importFileIcon} Import File".format(importFileIcon=importFileIcon)),
+        "{importFileIcon} {text}".format(
+            importFileIcon=importFileIcon, text=tr.decks_import_file()
+        ),
     ],
 ]
 
@@ -363,7 +367,7 @@ def drawButtons(self, _old):
     drawLinks = deepcopy(self.drawLinks)
     for b in drawLinks:
         if b[0]:
-            b[0] = _("Shortcut key: %s") % shortcut(b[0])
+            b[0] = tr.actions_shortcut_key(shortcut(b[0]))
         buf += """
 <button type="button" class='btn btn-sm' style="background:{THEME[buttons-color]}; color:{THEME[buttons-label-color]} " title='%s' onclick='pycmd(\"%s\");'> %s </button>""".format(
             THEME=THEME

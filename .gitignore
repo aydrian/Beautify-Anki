@@ -1,6 +1,9 @@
 # General
 .DS_Store
 
+# Anki
+meta.json
+
 # Python
 __pycache__
 *.pyc
